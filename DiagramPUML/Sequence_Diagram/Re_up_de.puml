@@ -1,0 +1,68 @@
+@startuml Update Reservation
+
+title "Manage CoworkingSpace (UPDATE ,DELETE)"
+
+
+actor "User/Admin" as client
+participant "<<JavaScript>>\nserver" as server
+participant "<<routes>>\nreservations" as routerReservations
+participant "<<middleware>>\nauth" as middleware
+participant "<<controllers>>\nreservations" as controllersReservations
+participant "<<model>>\nUser" as modelUser
+participant "<<model>>\nReservation" as modelReservation
+
+database "<<MongoDB>>\nusers" as UsersDatabase
+database "<<MongoDB>>\nreservations" as ReservationsDatabase
+
+== Update Single Reservation ==
+
+client->server ++:PUT('/reservations/:id')
+server->routerReservations ++:use('/reservations/:id',reservations)
+routerReservations -> middleware ++:protect(token)
+middleware -> middleware ++:decodetoken
+middleware -> modelUser ++:findById(decode.id)
+modelUser -> UsersDatabase ++: UserSchema
+modelUser <-- UsersDatabase --: User
+middleware <-- modelUser --: User
+routerReservations <-- middleware --: next()
+
+
+routerReservations -> controllersReservations ++:updateReservation()
+controllersReservations -> modelReservation ++:findById(req.params.id)
+modelReservation -> ReservationsDatabase ++:ReservationSchema
+modelReservation <-- ReservationsDatabase --:Reservation
+controllersReservations <-- modelReservation --:Reservation
+controllersReservations -> modelReservation ++:findByIdAndUpdate(req.params.id, req.body)
+modelReservation -> ReservationsDatabase ++:ReservationSchema
+modelReservation <-- ReservationsDatabase --:Reservation
+controllersReservations <-- modelReservation --:Reservation
+controllersReservations -->client --:response
+
+
+
+== Delete Single Reservation ==
+
+client->server ++:DELETE('/reservations/:id')
+server->routerReservations ++:use('/reservations/:id',reservations)
+routerReservations -> middleware ++:protect(token)
+middleware -> middleware ++:decodetoken
+middleware -> modelUser ++:findById(decode.id)
+modelUser -> UsersDatabase ++: UserSchema
+modelUser <-- UsersDatabase --: User
+middleware <-- modelUser --: User
+routerReservations <-- middleware --: next()
+
+routerReservations -> controllersReservations ++:deleteReservation()
+controllersReservations -> modelReservation ++:findById(req.params.id)
+modelReservation -> ReservationsDatabase ++:ReservationSchema
+modelReservation <-- ReservationsDatabase --:Reservation
+controllersReservations <-- modelReservation --:Reservation
+controllersReservations -> modelReservation ++:deleteOne()
+modelReservation -> ReservationsDatabase ++:ReservationSchema
+modelReservation <-- ReservationsDatabase --:Reservation
+controllersReservations -->client --:response
+
+
+
+
+@enduml

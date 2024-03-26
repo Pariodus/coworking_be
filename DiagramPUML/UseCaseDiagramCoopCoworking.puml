@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+rectangle "CoworkingSpace" as coworking {    
+    usecase "Get All Coop" as getCoworkings
+    usecase "Get One Coop" as getCoworking
+    usecase "Create New Coop" as createCoworking
+    usecase "Delete Coop" as deleteCoworking
+    usecase "Update Coop" as updateCoworking
+}
+
+actor "User" as user
+user -- getCoworkings
+user -- getCoworking
+user -- createCoworking
+user -- deleteCoworking
+user -- updateCoworking
+
+actor "Admin" as admin
+getCoworkings -- admin
+getCoworking -- admin
+createCoworking -- admin
+deleteCoworking -- admin
+updateCoworking -- admin
+@enduml

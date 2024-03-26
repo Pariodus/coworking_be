@@ -1,0 +1,119 @@
+@startuml
+left to right direction
+skinparam linetype ortho
+class "<<Application>>\nCoworkingSpace" as Coworking{}
+
+class "<<Resource>>\nAuthentication" as Auth {}
+class "<<Resource>>\nRegister" as Register {
+    <<POST>> +register(): User
+}
+class "<<Resource>>\nLogin" as Login {
+    <<POST>> +login(): User
+}
+class "<<Resource>>\nGetMe" as GetMe {
+    <<POST>> +getMe(): User
+}
+class "<<Resource>>\nLogout" as Logout {
+    <<POST>> +logout(): void
+}
+class "<<Model>>\nUser" as MUser {
+    -name
+    -email
+    -role
+    -password
+    -createAt
+}
+
+class "<<Resource>>\nCoworking" as Coop {
+    <<GET>> +getCoworking(): Coworkings
+    <<POST>> +createCoworking(): Coworkings
+}
+class "<<Resource>>\nCoworking" as Coopid {
+    <<GET>> +getCoworking(): Coworking
+    <<PUT>> +updateCoworking(): Coworking
+    <<DELETE>> +deleteCoworking(): void
+}
+class "<<Model>>\nCoworking" as MCoop {
+    -name
+    -address
+    -tel
+    -openTime
+    -closeTime
+}
+
+class "<<Resource>>\nReservation" as Res {
+    <<GET>> +getReservation(): Reservations
+}
+class "<<Resource>>\nReservation" as Resid {
+    <<GET>> +getReservation(): Reservation
+    <<PUT>> +updateReservation(): Reservation
+    <<DELETE>> +deleteReservation(): void
+}
+class "<<Model>>\nReservation" as MRes {
+    -reservationDateStart
+    -reservationDateEnd
+    -user
+    -coworking
+    -createAt
+}
+
+class "<<Resource>>\nReservation" as ResCo {
+    <<GET>> +getUserReservations(): Reservation
+    
+}
+
+class "<<Resource>>\nReservation" as ResUser {
+    <<POST>> +addReservation(): Reservation
+}
+
+class "<<Resource>>\nReservation" as ResRange {
+    <<GET>> +getReservationsInRange(): Reservations
+}
+
+class "<<Resource>>\nUsers" as Users {
+    <<GET>> +getUsers(): Users
+}
+
+class "<<Resource>>\nUsers" as User {
+    <<PUT>> +updateUser(): User
+    <<DELETE>> +deleteUser(): void
+}
+
+Coworking --> Users:"<<Path>>\n/users"
+Users --> User:"<<Path>>\n/user_id"
+
+Coworking --> Auth:"<<Path>>\n/auth"
+Auth --> Register:"<<Path>>\n/register"
+Auth --> Login:"<<Path>>\n/login"
+Auth --> GetMe:"<<Path>>\n/me"
+Auth --> Logout:"<<Path>>\n/logout"
+
+Users --> MUser
+User --> MUser
+Register --> MUser
+Login --> MUser
+GetMe --> MUser
+Logout --> MUser
+
+Coworking --> Coop:"<<Path>>\n/coworking"
+Coop --> Coopid:"<<Path>>\n/:coworking_id"
+
+Coop --> MCoop
+Coopid --> MCoop
+
+Coworking --> Res:"<<Path>>\n/reservation"
+Res --> Resid:"<<Path>>\n/:reservation_id"
+
+Res --> MRes
+Resid --> MRes
+
+Coworking --> ResCo:"<<Path>>\n/coworkings/coworking_id/reservations"
+Res --> ResUser:"<<Path>>\n/user/user_id"
+Res --> ResRange:"<<Path>>\n/range/:start/:end"
+
+ResCo --> MRes
+ResCo --> MCoop
+ResUser --> MRes
+ResUser --> MUser
+ResRange --> MRes
+@enduml

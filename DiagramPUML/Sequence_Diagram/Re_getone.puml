@@ -1,0 +1,47 @@
+@startuml Manage Reservations 
+
+title "Manage CoworkingSpace (GET SINGLE)"
+
+actor "User" as client
+participant "<<JavaScript>>\nserver" as server
+participant "<<routes>>\nreservations" as routerReservations
+participant "<<middleware>>\nauth" as middleware
+participant "<<controllers>>\nreservations" as controllersReservations
+participant "<<model>>\nUser" as modelUser
+participant "<<model>>\nReservation" as modelReservation
+
+database "<<MongoDB>>\nusers" as UsersDatabase
+database "<<MongoDB>>\nreservations" as ReservationsDatabase
+
+
+== Get Single Reservation ==
+
+client->server ++:GET('/reservations/:id')
+server->routerReservations ++:use('/reservations/:id',reservations)
+routerReservations -> middleware ++:protect(token)
+middleware -> middleware ++:decodetoken
+middleware -> modelUser ++:findById(decode.id)
+modelUser -> UsersDatabase ++: UserSchema
+modelUser <-- UsersDatabase --: User
+middleware <-- modelUser --: User
+routerReservations <-- middleware --: next()
+
+alt User Role is not Admin
+    routerReservations -> controllersReservations ++:getReservation()
+    controllersReservations -> modelReservation ++:findById(req.params.id).populate({ path: "coworking", select: "name description tel" })
+    modelReservation -> ReservationsDatabase ++:ReservationSchema
+    modelReservation <-- ReservationsDatabase --:Reservation
+    controllersReservations <-- modelReservation --:Reservation
+    client <-- controllersReservations --:response
+
+else User Role is Admin
+    routerReservations -> controllersReservations ++:getReservation()
+    controllersReservations -> modelReservation ++:findById(req.params.id).populate({ path: "coworking", select: "name description tel" })
+    modelReservation -> ReservationsDatabase ++:ReservationSchema
+    modelReservation <-- ReservationsDatabase --:Reservation
+    controllersReservations <-- modelReservation --:Reservation
+    client <-- controllersReservations --:response
+
+end
+
+@enduml

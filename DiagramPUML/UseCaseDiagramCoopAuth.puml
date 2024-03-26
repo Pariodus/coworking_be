@@ -1,0 +1,22 @@
+@startuml
+left to right direction
+rectangle "Auth" as Auth {    
+    usecase "Register" as register
+    usecase "Login" as login
+    usecase "GetMe" as getMe
+    usecase "Logout" as logout
+}
+
+actor "User" as user
+user -- register
+user -- login
+user -- getMe
+user -- logout
+
+actor "Admin" as admin
+register -- admin
+login -- admin
+getMe -- admin
+logout -- admin
+
+@enduml

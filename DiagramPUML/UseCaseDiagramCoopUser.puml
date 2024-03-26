@@ -1,0 +1,19 @@
+@startuml
+left to right direction
+rectangle "User" as User {    
+    usecase "Get All User" as getUsers
+    usecase "Update User Detail" as updateDetails
+    usecase "Update Own Detail" as updateOwn
+    usecase "Delete User" as delUser
+    usecase "Delete Own" as delOwn
+}
+
+actor "Admin" as admin
+getUsers -- admin
+updateDetails -- admin
+delUser -- admin
+
+actor "User" as user
+user -- updateOwn
+user -- delOwn
+@enduml

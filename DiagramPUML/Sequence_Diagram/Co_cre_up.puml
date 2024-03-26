@@ -1,0 +1,61 @@
+@startuml Manage CoworkingSpace (CREATE, UPDATE)
+
+title "Manage CoworkingSpace (CREATE, UPDATE)"
+
+actor "Admin" as client
+participant "<<javaScript>>\nserver" as server
+participant "<<routes>>\ncoworking" as routerCoworkingSpaces
+participant "<<middleware>>\auth" as middleware
+participant "<<controllers>>\ncoworkings" as controllersCoworkingSpaces
+participant "<<model>>\nUser" as modelUser
+participant "<<model>>\nCoworking" as modelCoworkingSpace
+database "<<MongoDB>>\nusers" as UsersDatabase
+database "<<MongoDB>>\ncoworkings" as CoworkingSpacesDatabase
+
+
+== Create New CoworkingSpace ==
+
+client->server ++:POST('/coworking')
+server->routerCoworkingSpaces ++:use('/coworkings',coworking)
+routerCoworkingSpaces -> middleware ++:protect(token)
+middleware -> middleware ++:decodetoken
+middleware -> modelUser ++:findById(decode.id)
+modelUser -> UsersDatabase ++: UserSchema
+modelUser <-- UsersDatabase --: User
+middleware <-- modelUser --: User
+routerCoworkingSpaces <-- middleware --: next()
+
+routerCoworkingSpaces -> middleware ++:authorize(admin)
+routerCoworkingSpaces <-- middleware --: next()
+
+routerCoworkingSpaces -> controllersCoworkingSpaces ++:createCoworking()
+controllersCoworkingSpaces -> modelCoworkingSpace ++:create(req.body)
+modelCoworkingSpace -> CoworkingSpacesDatabase ++:CoworkingSchema
+modelCoworkingSpace <-- CoworkingSpacesDatabase --:Coworking
+controllersCoworkingSpaces <-- modelCoworkingSpace --:Coworking
+client <-- controllersCoworkingSpaces --:response
+
+== Update Single CoworkingSpace ==
+
+client->server ++:PUT('coworking/:id')
+server->routerCoworkingSpaces ++:use('/coworkings/:id',coworking)
+routerCoworkingSpaces -> middleware ++:protect(token)
+middleware -> middleware ++:decodetoken
+middleware -> modelUser ++:findById(decode.id)
+modelUser -> UsersDatabase ++: UserSchema
+modelUser <-- UsersDatabase --: User
+middleware <-- modelUser --: User
+routerCoworkingSpaces <-- middleware --: next()
+
+routerCoworkingSpaces -> middleware ++:authorize(admin)
+routerCoworkingSpaces <-- middleware --: next()
+
+routerCoworkingSpaces -> controllersCoworkingSpaces ++:updateCoworking()
+controllersCoworkingSpaces -> modelCoworkingSpace ++:findByIDAndUpdate(req.params.id, req.body)
+modelCoworkingSpace -> CoworkingSpacesDatabase ++:CoworkingSchema
+modelCoworkingSpace <-- CoworkingSpacesDatabase --:Coworking
+controllersCoworkingSpaces <-- modelCoworkingSpace --:Coworking
+client <-- controllersCoworkingSpaces --:response
+
+
+@enduml

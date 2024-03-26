@@ -1,0 +1,42 @@
+@startuml
+left to right direction
+rectangle "Reservation" as reserve {    
+    usecase "Get All reserve" as getReserves
+    usecase "Get All Own reserve" as getOwnReserves
+
+    usecase "Get One reserve" as getReserve
+    usecase "Get One Own reserve" as getOwnReserve
+
+    usecase "Add One reserve" as addReserve
+
+    usecase "Update reserve" as updateReserves
+    usecase "Update Own reserve" as updateOwnReserves
+
+    usecase "Delete reserve" as deleteReserve
+    usecase "Delete Own reserve" as deleteOwnReserve
+
+    usecase "Get reserve for Coop" as getReserveForCoop
+    usecase "Get Own reserve for Coop" as getOwnReserveForCoop
+
+    usecase "Get reserve Date" as getReserveDate
+    usecase "Get Own reserve Date" as getOwnReserveDate
+}
+
+actor "User" as user
+user -- getOwnReserves
+user -- getOwnReserve
+user -- addReserve
+user -- updateOwnReserves
+user -- deleteOwnReserve
+user -- getOwnReserveForCoop
+user -- getOwnReserveDate
+
+actor "Admin" as admin
+getReserves -- admin
+getReserve -- admin
+addReserve -- admin
+updateReserves -- admin
+deleteReserve -- admin
+getReserveForCoop -- admin
+getReserveDate -- admin
+@enduml

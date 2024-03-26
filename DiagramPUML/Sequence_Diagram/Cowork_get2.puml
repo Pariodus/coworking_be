@@ -1,0 +1,42 @@
+@startuml Manage CoworkingSpace (GET ALL, GET SINGLE)
+
+title "Manage CoworkingSpace (GET ALL, GET SINGLE)"
+
+actor "User/Admin" as user
+participant "<<javaScript>>\nserver" as server
+participant "<<routes>>\ncoworking" as routerCoworkingSpaces
+participant "<<middleware>>\auth" as middleware
+participant "<<controllers>>\ncoworkings" as controllersCoworkingSpaces
+participant "<<model>>\nCoworking" as modelCoworkingSpace
+database "<<MongoDB>>\ncoworkings" as CoworkingSpacesDatabase
+
+
+== Get All CoworkingSpace ==
+
+user->server ++:GET('/coworkings')
+server->routerCoworkingSpaces ++:use('/coworkings',coworking)
+routerCoworkingSpaces -> middleware ++:protect(token)
+middleware -> middleware ++:decodetoken
+middleware -> controllersCoworkingSpaces ++:getCoworkings()
+controllersCoworkingSpaces->modelCoworkingSpace ++:find(req.query)
+modelCoworkingSpace ->CoworkingSpacesDatabase ++: CoworkingSchema
+CoworkingSpacesDatabase --> modelCoworkingSpace --: Coworking
+controllersCoworkingSpaces <-- modelCoworkingSpace --:Coworking
+controllersCoworkingSpaces -->user --:response
+
+
+
+== Get Single CoworkingSpace ==
+
+user->server ++:GET('/coworkings/:id')
+server->routerCoworkingSpaces ++:use('/api/v1/coworkings/:id',coworking)
+routerCoworkingSpaces -> middleware ++:protect(token)
+middleware -> middleware ++:decodetoken
+middleware -> controllersCoworkingSpaces ++:getCoworking()
+controllersCoworkingSpaces->modelCoworkingSpace ++:findById(req.params.id)
+modelCoworkingSpace ->CoworkingSpacesDatabase ++: CoworkingSchema
+CoworkingSpacesDatabase --> modelCoworkingSpace --: Coworking
+controllersCoworkingSpaces <-- modelCoworkingSpace --:Coworking
+controllersCoworkingSpaces -->user --:response
+
+@enduml

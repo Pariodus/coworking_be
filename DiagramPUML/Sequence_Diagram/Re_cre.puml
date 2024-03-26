@@ -1,0 +1,45 @@
+@startuml Manage Reservations 
+
+title "Manage CoworkingSpace (CREATE)"
+
+actor "User/Admin" as client
+participant "<<JavaScript>>\nserver" as server
+participant "<<routes>>\nreservations" as routerReservations
+participant "<<middleware>>\nauth" as middleware
+participant "<<controllers>>\nreservations" as controllersReservations
+participant "<<model>>\nUser" as modelUser
+participant "<<model>>\nCoworking" as modelCoworking
+participant "<<model>>\nReservation" as modelReservation
+
+database "<<MongoDB>>\nusers" as UsersDatabase
+database "<<MongoDB>>\ncoworkings" as CoworkingsDatabase
+database "<<MongoDB>>\nreservations" as ReservationsDatabase
+
+== Create New Reservation ==
+
+client->server ++:POST('coworkings/:coworkingId/reservations/')
+server->routerReservations ++:use('coworkings/:coworkingId/reservations/',reservations)
+routerReservations -> middleware ++:protect(token)
+middleware -> middleware ++:decodetoken
+middleware -> modelUser ++:findById(decode.id)
+modelUser -> UsersDatabase ++: UserSchema
+modelUser <-- UsersDatabase --: User
+middleware <-- modelUser --: User
+routerReservations <-- middleware --: next()
+
+routerReservations -> controllersReservations ++:addReservation()
+controllersReservations -> modelCoworking ++:findById(req.params.coworkingId)
+modelCoworking -> CoworkingsDatabase ++:CoworkingSchema
+modelCoworking <-- CoworkingsDatabase --:Coworking
+controllersReservations <-- modelCoworking --:Coworking
+controllersReservations -> modelReservation ++:find({ user: req.user.id })
+modelReservation -> ReservationsDatabase ++:ReservationSchema
+modelReservation <-- ReservationsDatabase --:Reservation
+controllersReservations <-- modelReservation --:Reservation
+controllersReservations -> modelReservation ++:create(req.body)
+modelReservation -> ReservationsDatabase ++:ReservationSchema
+modelReservation <-- ReservationsDatabase --:Reservation
+controllersReservations <-- modelReservation --:Reservation
+client <-- controllersReservations --:response
+
+@enduml
